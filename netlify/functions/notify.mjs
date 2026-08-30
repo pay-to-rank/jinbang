@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless';
-import AlipaySdk from 'alipay-sdk';
+import { AlipaySdk } from 'alipay-sdk';
 
 const sql = neon(process.env.DATABASE_URL);
 
