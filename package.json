@@ -1,0 +1,8 @@
+{
+  "name": "jinbang",
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "alipay-sdk": "^4.12.1"
+  }
+}
