@@ -94,12 +94,14 @@ export default async (req) => {
     if (contact.length < 3) errors.push('请填写联系方式');
     if (errors.length) return json({ error: errors.join('；') }, 400);
 
-    /* 榜单满员时：出价必须高于末位 */
+    /* 榜单满员时：出价必须比末位至少高出 1 元 */
     const cnt = await sql`SELECT count(*)::int AS n FROM sites WHERE status='approved'`;
     if (cnt[0].n >= 100) {
       const tail = await sql`SELECT amount FROM sites WHERE status='approved' ORDER BY amount DESC, approved_at ASC LIMIT 1 OFFSET 99`;
       const need = Number(tail[0].amount);
-      if (amount <= need) return json({ error: `榜单已满，出价需高于 ¥${need} 才能上榜` }, 400);
+      if (amount < need + 1) {
+        return json({ error: `榜单已满，末位出价 ¥${need.toFixed(2)}，新出价需至少 ¥${(need + 1).toFixed(2)}（比末位高出 1 元以上）才能上榜` }, 400);
+      }
     }
 
     /* 高熵订单号（UUID），无法被枚举猜测 */
