@@ -74,12 +74,12 @@ export default async (req) => {
     if (!passwordOk(password)) return json({ error: '密码错误' }, 401);
 
     if (action === 'list') {
-      const pending = await sql`SELECT id, title, url, description, contact, amount, paid_at
-        FROM sites WHERE status='pending_review' ORDER BY paid_at DESC`;
-      const approved = await sql`SELECT id, title, url, amount, approved_at
-        FROM sites WHERE status='approved' ORDER BY amount DESC LIMIT 200`;
-      const rejected = await sql`SELECT id, title, url, amount, approved_at
-        FROM sites WHERE status='rejected' ORDER BY approved_at DESC LIMIT 100`;
+const pending = await sql`SELECT id, order_no, title, url, description, contact, amount, paid_at
+  FROM sites WHERE status='pending_review' ORDER BY paid_at DESC`;
+const approved = await sql`SELECT id, order_no, title, url, amount, approved_at
+  FROM sites WHERE status='approved' ORDER BY amount DESC LIMIT 200`;
+const rejected = await sql`SELECT id, order_no, title, url, amount, approved_at
+  FROM sites WHERE status='rejected' ORDER BY approved_at DESC LIMIT 100`;
       return json({ pending, approved, rejected });
     }
     if (action === 'approve' && id) {
