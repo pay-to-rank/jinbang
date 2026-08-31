@@ -367,11 +367,12 @@ function banner(type, text){
   $('#bannerText').textContent = text;
 }
  $('#bannerClose').onclick = () => $('#banner').classList.add('hidden');
-function countUp(el, target, prefix){
+function countUp(el, target, prefix, integer){
   const t0 = performance.now(), dur = 700;
   (function step(t){
     const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
-    el.textContent = prefix + fmt(target * e);
+    const v = target * e;
+    el.textContent = prefix + (integer ? Math.round(v).toLocaleString('zh-CN') : fmt(v));
     if (p < 1) requestAnimationFrame(step);
   })(t0);
 }
@@ -405,7 +406,7 @@ function getDemoSites(){
 /* ================= 渲染 ================= */
 function renderStats(){
   const s = state.stats;
-  countUp($('#stCount'), s.count, '');
+  countUp($('#stCount'), s.count, '', true);
   countUp($('#stTotal'), s.total, '¥ ');
   $('#stThreshold').textContent = state.sites.length >= s.cap
     ? '¥ ' + fmt(s.threshold + 1) : '¥ 5.00 起';
