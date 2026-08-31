@@ -37,9 +37,9 @@ export default async (req) => {
     if (req.method !== 'GET') return json({ error: '方法不允许' }, 405);
     await ensureTable();
     const rows = await sql`
-      SELECT title, url, description, amount, approved_at
+      SELECT title, url, description, amount, paid_at
       FROM sites WHERE status = 'approved'
-      ORDER BY amount DESC, approved_at ASC`;
+      ORDER BY amount DESC, paid_at ASC`;
     const all = rows.map(r => ({ ...r, amount: Number(r.amount) }));
     const cap = 100;
     const sites = all.slice(0, cap);
