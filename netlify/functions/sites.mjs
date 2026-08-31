@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
-  status, headers: { 'content-type': 'application/json; charset=utf-8' },
+  status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=300' },
 });
 
 let ensured = false;
