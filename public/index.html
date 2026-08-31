@@ -230,7 +230,7 @@ footer .ft-title{color:var(--paper);letter-spacing:.2em;font-size:13px;margin-bo
     <div class="hero-main">
       <p class="kicker">竞价展位 · 价高者前 · 人工审核</p>
       <h1>金榜</h1>
-      <p class="hero-sub">出价登榜，价高者前。<br>一块用真金白银排定座次的中文网站榜单——付一点钱，让认真做的东西被看见。</p>
+      <p class="hero-sub">出价登榜，价高者前。<br>一块用真金白银排定座次的网站榜单——付一点钱，让认真做的东西被看见。</p>
       <div class="hero-cta">
         <a href="#submit" class="btn primary">提交网站 · 五元起价</a>
         <a href="#rules" class="btn ghost">先看规则</a>
@@ -258,7 +258,7 @@ footer .ft-title{color:var(--paper);letter-spacing:.2em;font-size:13px;margin-bo
     </div>
     <div class="list-head"><span>名次</span><span></span><span>网站</span><span class="r">出价</span></div>
     <ol class="list" id="list"></ol>
-    <p class="board-foot" id="boardFoot">榜单共 100 席。出价 ¥5 起价，价高者前；榜单满员后，新出价须高于末位，原末位将被挤出榜单。所有上榜网站均经人工审核，支付成功后不会立即展示，审核通过（通常 1 个工作日内）方可登榜。</p>
+    <p class="board-foot" id="boardFoot">榜单共 100 席。出价 ¥5 起价，价高者前；榜单满员后，须比末位高出至少 1 元，原末位将被挤出榜单。所有上榜网站均经人工审核，支付成功后不会立即展示，审核通过（通常 1 个工作日内）方可登榜。</p>
   </section>
 
   <!-- 规则 -->
@@ -409,7 +409,7 @@ function renderStats(){
   countUp($('#stCount'), s.count, '');
   countUp($('#stTotal'), s.total, '¥ ');
   $('#stThreshold').textContent = state.sites.length >= s.cap
-    ? '¥ ' + fmt(s.threshold) : '¥ 5.00 起';
+    ? '¥ ' + fmt(s.threshold + 1) : '¥ 5.00 起';
   $('#boardMeta').textContent = `刚刚更新 · 在榜 ${state.sites.length} 席 · 待审核 ${s.waiting} 个`;
 }
 
@@ -457,14 +457,14 @@ function predictRank(amt){
 function refreshPayBtn(){
   const v = parseFloat(amountInput.value);
   const okAmt = !isNaN(v) && v >= 5 && (!state.demo) || !isNaN(v) && v >= 5;
-  const full = state.sites.length >= state.stats.cap && v <= threshold();
+  const full = state.sites.length >= state.stats.cap && v < threshold() + 1;
   const agreed = $('#agree').checked;
   const valid = okAmt && !full;
   payBtn.disabled = !(valid && agreed);
   payBtn.textContent = valid ? `去支付宝支付 ¥${fmt(v)}` : (full ? '出价低于门槛，无法上榜' : '填写完成后去支付');
   const p = $('#predict');
   if (isNaN(v) || v < 5){ p.className = 'predict'; p.textContent = v ? '出价需不低于 ¥5.00' : ''; return; }
-  if (full){ p.className = 'predict bad'; p.textContent = `榜单已满，出价需高于 ¥${fmt(threshold())} 才能上榜`; return; }
+  if (full){ p.className = 'predict bad'; p.textContent = `榜单已满，末位 ¥${fmt(threshold())}，新出价需至少 ¥${fmt(threshold() + 1)}`; return; }
   const r = predictRank(v);
   if (r === 1){ p.className = 'predict hot'; p.textContent = state.sites.length ? '此价将登榜首' : '首笔出价，将登榜首'; }
   else { p.className = 'predict'; p.textContent = `预计排名：第 ${r} 名`; }
@@ -485,7 +485,7 @@ form.addEventListener('submit', async e => {
   bad = markError('#fUrl', !urlOk) || bad;
   bad = markError('#fContact', contact.length < 3) || bad;
   bad = markError('#fAmount', !(amt >= 5 && amt <= 100000)) || bad;
-  if (state.sites.length >= state.stats.cap && amt <= threshold()){ markError('#fAmount', true); bad = true; }
+  iif (state.sites.length >= state.stats.cap && amt < threshold() + 1){ markError('#fAmount', true); bad = true; }
   if (bad){ toast('请检查标红的必填项', true); return; }
   if (!$('#agree').checked){ toast('请先勾选确认声明'); return; }
 
