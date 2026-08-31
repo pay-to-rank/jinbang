@@ -543,7 +543,7 @@ function renderAdminPanel(groups){
     ${ items.length ? items.map(x => `
       <div class="aitem">
         <div class="meta"><b>${esc(x.title)}</b>
-          <div class="sub">${esc(x.url)}<br>出价 ¥${fmt(x.amount)}${x.contact ? ' · 联系：' + esc(x.contact) : ''}${x.paid_at || x.created_at ? ' · ' + relTime(x.paid_at || x.created_at) : ''}</div>
+        <div class="sub">${esc(x.url)}<br>出价 ¥${fmt(x.amount)}${x.contact ? ' · 联系：' + esc(x.contact) : ''}${x.paid_at || x.created_at ? ' · ' + relTime(x.paid_at || x.created_at) : ''}${x.order_no ? '<br>订单号：' + esc(x.order_no) : ''}</div>
         </div>
         ${actionable ? `<div class="abtns">
           <button class="sbtn ok" data-a="approve" data-id="${x.id}">通过</button>
@@ -570,7 +570,7 @@ function renderAdminPanel(groups){
 async function loadAdmin(){
   if (state.demo){
     const arr = demoStore.get();
-    renderAdminPanel({
+    出价Panel({
       pending:  arr.filter(x => x.status === 'pending_review'),
       approved: arr.filter(x => x.status === 'approved'),
       rejected: arr.filter(x => x.status === 'rejected'),
