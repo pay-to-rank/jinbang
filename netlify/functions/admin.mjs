@@ -83,9 +83,17 @@ const rejected = await sql`SELECT id, order_no, title, url, amount, approved_at
       return json({ pending, approved, rejected });
     }
     if (action === 'approve' && id) {
-      await sql`UPDATE sites SET status='approved', approved_at=NOW() WHERE id=${Number(id)} AND status='pending_review'`;
-      return json({ ok: true });
-    }
+  await sql`UPDATE sites SET status='approved', approved_at=NOW() WHERE id=${Number(id)} AND status='pending_review'`;
+  /* 自动归档跌出前 100 的记录 */
+  await sql`UPDATE sites SET status='superseded'
+    WHERE id IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (ORDER BY amount DESC, approved_at ASC) AS rank
+        FROM sites WHERE status='approved'
+      ) r WHERE rank > 100
+    )`;
+  return json({ ok: true });
+}
     if (action === 'reject' && id) {
       await sql`UPDATE sites SET status='rejected', approved_at=NOW() WHERE id=${Number(id)} AND status='pending_review'`;
       return json({ ok: true });
