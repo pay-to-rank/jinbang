@@ -73,15 +73,17 @@ export default async (req) => {
     if (!process.env.ADMIN_PASSWORD) return json({ error: '未配置 ADMIN_PASSWORD 环境变量' }, 500);
     if (!passwordOk(password)) return json({ error: '密码错误' }, 401);
 
-    if (action === 'list') {
-const pending = await sql`SELECT id, order_no, title, url, description, contact, amount, paid_at
-  FROM sites WHERE status='pending_review' ORDER BY paid_at DESC`;
-const approved = await sql`SELECT id, order_no, title, url, amount, approved_at
-  FROM sites WHERE status='approved' ORDER BY amount DESC LIMIT 200`;
-const rejected = await sql`SELECT id, order_no, title, url, amount, approved_at
-  FROM sites WHERE status='rejected' ORDER BY approved_at DESC LIMIT 100`;
-      return json({ pending, approved, rejected });
-    }
+   if (action === 'list') {
+  const pending = await sql`SELECT id, order_no, title, url, description, contact, amount, paid_at
+    FROM sites WHERE status='pending_review' ORDER BY paid_at DESC`;
+  const approved = await sql`SELECT id, order_no, title, url, amount, approved_at
+    FROM sites WHERE status='approved' ORDER BY amount DESC LIMIT 200`;
+  const rejected = await sql`SELECT id, order_no, title, url, amount, approved_at
+    FROM sites WHERE status='rejected' ORDER BY approved_at DESC LIMIT 100`;
+  const superseded = await sql`SELECT id, order_no, title, url, amount, approved_at
+    FROM sites WHERE status='superseded' ORDER BY approved_at DESC LIMIT 100`;
+  return json({ pending, approved, rejected, superseded });
+}
     if (action === 'approve' && id) {
   await sql`UPDATE sites SET status='approved', approved_at=NOW() WHERE id=${Number(id)} AND status='pending_review'`;
   /* 自动归档跌出前 100 的记录 */
