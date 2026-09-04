@@ -548,8 +548,8 @@ function renderAdminPanel(groups){
           <button class="sbtn" data-a="reject" data-id="${x.id}">拒绝</button></div>` : ''}
       </div>`).join('') : '<div class="anone">暂无记录</div>'}
     </div>`;
-  $('#adminPanel').innerHTML =
-    g('待审核', groups.pending, true) + g('已通过', groups.approved, false) + g('已拒绝', groups.rejected, false);
+   $('#adminPanel').innerHTML =
+  g('待审核', groups.pending, true) + g('已通过', groups.approved, false) + g('已挤出归档', groups.superseded || [], false) + g('已拒绝', groups.rejected, false);
 }
  $('#adminPanel').addEventListener('click', async e => {
   const btn = e.target.closest('button[data-a]'); if (!btn) return;
