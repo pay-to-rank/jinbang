@@ -90,6 +90,17 @@ export default async (req) => {
     if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
     if (url.length > 500) errors.push('网址过长');
     try { if (!new URL(url).hostname.includes('.')) throw 0; } catch { errors.push('网址格式不正确'); }
+        try { if (!new URL(url).hostname.includes('.') && !errors.includes('网址格式不正确')) throw 0; } catch { errors.push('网址格式不正确'); }
+    /* 网址归一化：同一网站的各种写法统一成标准形式，防止绕过"一站一席" */
+    if (!errors.includes('网址格式不正确')) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.toLowerCase().replace(/^www\./, '');   /* 域名小写、去 www */
+        const port = (u.port && u.port !== '80' && u.port !== '443') ? ':' + u.port : '';
+        const path = u.pathname.replace(/\/+$/, '');                    /* 去末尾斜杠 */
+        url = 'https://' + host + port + path;                          /* 统一 https、丢弃参数和锚点 */
+      } catch {}
+    }
     if (!Number.isFinite(amount) || amount < 5 || amount > 100000) errors.push('出价需在 ¥5 – ¥100,000 之间');
     if (contact.length < 3) errors.push('请填写联系方式');
     if (errors.length) return json({ error: errors.join('；') }, 400);
