@@ -84,9 +84,16 @@ export default async (req) => {
     FROM sites WHERE status='superseded' ORDER BY approved_at DESC LIMIT 100`;
   return json({ pending, approved, rejected, superseded });
 }
-    if (action === 'approve' && id) {
+   if (action === 'approve' && id) {
+  /* 先查出这条记录的网址 */
+  const rows0 = await sql`SELECT url FROM sites WHERE id=${Number(id)}`;
+  if (rows0.length) {
+    /* 同一网址的旧上榜记录先归档（注意在"通过"之前执行，避免把自己也归档掉） */
+    await sql`UPDATE sites SET status='superseded'
+      WHERE url=${rows0[0].url} AND status='approved' AND id <> ${Number(id)}`;
+  }
   await sql`UPDATE sites SET status='approved', approved_at=NOW() WHERE id=${Number(id)} AND status='pending_review'`;
-  /* 自动归档跌出前 100 的记录 */
+  /* 挤出即归档：跌出前 100 名的记录自动归档 */
   await sql`UPDATE sites SET status='superseded'
     WHERE id IN (
       SELECT id FROM (
