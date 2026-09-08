@@ -90,7 +90,6 @@ export default async (req) => {
     if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
     if (url.length > 500) errors.push('网址过长');
     try { if (!new URL(url).hostname.includes('.')) throw 0; } catch { errors.push('网址格式不正确'); }
-        try { if (!new URL(url).hostname.includes('.') && !errors.includes('网址格式不正确')) throw 0; } catch { errors.push('网址格式不正确'); }
     /* 网址归一化：同一网站的各种写法统一成标准形式，防止绕过"一站一席" */
     if (!errors.includes('网址格式不正确')) {
       try {
