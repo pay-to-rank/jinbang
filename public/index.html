@@ -520,7 +520,11 @@ async function pollOrder(orderNo){
     try {
       const r = await fetch('/api/order?order_no=' + encodeURIComponent(orderNo));
       const d = await r.json();
-      if (d.status === 'pending_review'){ banner('ok', `支付成功！「${d.title}」已进入人工审核，通过后即会上榜。`); return; }
+       if (d.status === 'pending_review'){
+        localStorage.setItem('jb_my_order', orderNo);   /* 记住我的订单，用于回访时提醒 */
+        banner('ok', `支付成功！「${d.title}」已进入人工审核，通过后即会上榜。`);
+        return;
+      }
       if (d.status === 'approved'){ banner('ok','该订单已审核通过，已登上榜单。'); return; }
       if (d.status === 'rejected'){ banner('ok','该订单未通过审核，出价将原路退回。'); return; }
     } catch {}
@@ -629,6 +633,17 @@ async function boot(){
     pollOrder(order);
   }
 }
+    /* 回访提醒：曾上榜的访客，若其网站已被挤出，展示回榜邀请 */
+  const myOrder = localStorage.getItem('jb_my_order');
+  if (myOrder && !order) {
+    try {
+      const r = await fetch('/api/order?order_no=' + encodeURIComponent(myOrder));
+      const d = await r.json();
+      if (d.status === 'superseded') {
+        banner('ok', `你的网站「${d.title}」已被更高出价挤出榜单。想回来？再次出价（高于当前末位至少 1 元）即可重回金榜 → 页面下方「提交网站」。`);
+      }
+    } catch {}
+  }
 boot();
 </script>
 </body>
