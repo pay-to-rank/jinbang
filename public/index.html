@@ -72,10 +72,31 @@ a{color:inherit}
 .amount .arr{opacity:0;transition:.15s;vertical-align:-1px;margin-left:6px}
 .row:hover .arr{opacity:.7}
 .row-top{padding:20px 2px}
+  /* 榜首网站名加“榜首”角标 */
+.row:nth-child(1) .rname::after{content:'榜首';font-size:10px;font-weight:600;color:#D4A017;border:1px solid rgba(212,160,23,.45);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:2px;letter-spacing:.1em}
+/* 前三名介绍文字稍大一号 */
+.row.top3 .rdesc{font-size:13.5px}
 .row-top .rname{font-size:16px}
 .empty{padding:70px 0;text-align:center}
 .empty b{display:block;font-size:22px;font-weight:700;margin-bottom:12px}
 .empty p{font-size:13px;color:var(--ink2);line-height:2}
+  /* ============ 前三名奖牌样式 ============ */
+.medal{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;margin-right:2px}
+.row:nth-child(1) .medal{background:#D4A017;box-shadow:0 0 0 3px rgba(212,160,23,.18)}   /* 金 */
+.row:nth-child(2) .medal{background:#9BA3AF;box-shadow:0 0 0 3px rgba(155,163,175,.18)}  /* 银 */
+.row:nth-child(3) .medal{background:#C08457;box-shadow:0 0 0 3px rgba(192,132,87,.18)}   /* 铜 */
+/* 前三名行：更醒目的行高与左侧奖牌色带 */
+.row.top3{padding:22px 2px}
+.row.top3 .rank-num{display:none}          /* 数字被奖牌取代 */
+.row.top3 .avatar{border-color:transparent}
+.row:nth-child(1).row-top{background:linear-gradient(90deg,rgba(212,160,23,.06),transparent 40%)}  /* 榜首金色渐隐底 */
+.row:nth-child(2).row-top{background:linear-gradient(90deg,rgba(155,163,175,.07),transparent 40%)}
+.row:nth-child(3).row-top{background:linear-gradient(90deg,rgba(192,132,87,.07),transparent 40%)}
+/* 悬停时奖牌轻微上浮 */
+.row:hover .medal{transform:translateY(-1px);transition:.15s}
+/* 金额列：前三名用强调色 */
+.row.top3 .amount{color:var(--accent)}
+.row.top3 .amount .rmb{color:var(--accent)}
 .board-foot{font-size:12px;color:var(--ink2);line-height:1.9;padding:18px 2px}
 
 /* ============ 规则 ============ */
@@ -398,10 +419,11 @@ function renderList(){
   ol.innerHTML = list.map((s, i) => {
     let host = ''; try { host = new URL(s.url).hostname.replace(/^www\./,''); } catch {}
     const first = Array.from(String(s.title).trim() || '站')[0];
+    const medal = i < 3 ? `<span class="medal">${i+1}</span>` : '';
     return `
     <li class="row${i<3?' top3':''}${i===0?' row-top':''}" data-url="${esc(s.url)}" tabindex="0" role="link"
         aria-label="${esc(s.title)}" style="animation-delay:${Math.min(i*35,400)}ms">
-      <div class="rank"><span class="rank-num">${String(i+1).padStart(2,'0')}</span></div>
+        <div class="rank">${medal || `<span class="rank-num">${String(i+1).padStart(2,'0')}</span>`}</div>
       <div class="avatar">${esc(first)}</div>
       <div class="info">
         <div class="rname">${esc(s.title)}<span class="rhost">${esc(host)}</span></div>
