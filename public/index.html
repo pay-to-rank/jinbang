@@ -627,13 +627,13 @@ async function boot(){
   /* 支付宝付款后的同步回跳：?paid=订单号 或支付宝自带的 out_trade_no */
   const q = new URLSearchParams(location.search);
   const order = q.get('paid') || q.get('out_trade_no');
-  if (order){
+   if (order){
     history.replaceState(null, '', location.pathname);
     banner('pending', '正在确认支付结果，请稍候……');
     pollOrder(order);
   }
-}
-    /* 回访提醒：曾上榜的访客，若其网站已被挤出，展示回榜邀请 */
+
+  /* 回访提醒：曾上榜的访客，若其网站已被挤出，展示回榜邀请 */
   const myOrder = localStorage.getItem('jb_my_order');
   if (myOrder && !order) {
     try {
@@ -644,6 +644,7 @@ async function boot(){
       }
     } catch {}
   }
+}
 boot();
 </script>
 </body>
