@@ -58,21 +58,21 @@ a{color:inherit}
 .list-head{display:grid;grid-template-columns:56px 36px 1fr 110px;gap:18px;padding:12px 2px;font-size:11px;letter-spacing:.12em;color:var(--ink2);border-bottom:1px solid var(--line)}
 .list-head .r{text-align:right}
 .list{list-style:none}
-.row{display:grid;grid-template-columns:56px 36px 1fr 110px;gap:18px;align-items:center;padding:16px 2px;border-bottom:1px solid var(--line);cursor:pointer;transition:.12s;opacity:0;animation:rise .4s forwards}
+.row{display:grid;grid-template-columns:56px 36px minmax(0,1fr) 110px;gap:18px;align-items:center;padding:16px 2px;border-bottom:1px solid var(--line);cursor:pointer;transition:.12s;opacity:0;animation:rise .4s forwards}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .row:hover{background:var(--bg2)}
 .rank-num{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink2)}
 .row.top3 .rank-num{color:var(--ink)}
 .avatar{width:36px;height:36px;background:var(--bg2);border:1px solid var(--line);color:var(--ink2);display:grid;place-items:center;font-size:14px;font-weight:600;border-radius:8px}
 .row-top .avatar{background:var(--ink);border-color:var(--ink);color:#fff}
-.rname{font-size:15px;font-weight:600}
+.rname{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rhost{font-size:12px;color:var(--ink2);margin-left:8px;font-family:var(--mono)}
 .rdesc{font-size:13px;color:var(--ink2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .amount{text-align:right;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .amount .rmb{font-size:12px;color:var(--ink2);margin-right:2px}
 .amount .arr{opacity:0;transition:.15s;vertical-align:-1px;margin-left:6px}
 .row:hover .arr{opacity:.7}
-.row-top{padding:20px 2px}
+.row-top{padding:20px 2px;grid-template-columns:56px 36px minmax(0,1fr) 110px}
   /* 榜首网站名加“榜首”角标 */
 .row:nth-child(1) .rname::after{content:'榜首';font-size:10px;font-weight:600;color:#D4A017;border:1px solid rgba(212,160,23,.45);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:2px;letter-spacing:.1em}
 /* 前三名介绍文字稍大一号 */
@@ -187,7 +187,7 @@ footer .ft-title{color:var(--ink);font-weight:600;font-size:13px;margin-bottom:8
   .stat{border-top:1px solid var(--line);border-right:none}
   .stat:nth-child(odd){border-right:1px solid var(--line)}
   .list-head{display:none}
-  .row,.row-top{grid-template-columns:32px 32px 1fr auto;gap:12px;padding:14px 2px}
+  .row,.row-top{grid-template-columns:32px 32px minmax(0,1fr) auto;gap:12px;padding:14px 2px}
   .avatar{width:32px;height:32px;font-size:13px;border-radius:7px}
   .rname{font-size:14px}
   .rhost{display:block;margin:3px 0 0;font-size:11px}
