@@ -505,9 +505,15 @@ form.addEventListener('submit', async e => {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ title, url, description: desc, contact, amount: amt })
     });
-    const data = await r.json();
+        const data = await r.json();
     if (!r.ok) throw new Error(data.error || '提交失败，请稍后再试');
-    location.href = data.payUrl;           /* 跳转支付宝收银台 */
+
+    /* 当面付：弹窗展示二维码，开始轮询支付状态 */
+    $('#qrAmount').textContent = '¥ ' + fmt(amt);
+    $('#qrBox').innerHTML = '';                                   /* 清掉旧码 */
+    new QRCode($('#qrBox'), { text: data.qrCode, width: 200, height: 200 });
+    $('#qrModal').classList.remove('hidden');
+    pollOrder(data.orderNo);                                      /* 后台每2秒查一次，付完自动提示 */
   } catch (err) {
     toast(err.message, true);
     payBtn.textContent = `去支付宝支付 ¥${fmt(amt)}`; payBtn.disabled = false;
@@ -517,6 +523,9 @@ form.addEventListener('submit', async e => {
 /* 演示支付 */
 let pendingDemo = null;
  $('#modalCancel').onclick = $('#modalMask').onclick = () => $('#modal').classList.add('hidden');
+  /* 扫码弹窗：取消与手动查进度 */
+ $('#qrCancel').onclick = () => { $('#qrModal').classList.add('hidden'); window.stopPolling = true; };
+ $('#qrPaid').onclick = () => { toast('正在查询支付结果…'); };
  $('#modalOk').onclick = () => {
   $('#modal').classList.remove('hidden');
   if (pendingDemo){
@@ -529,9 +538,10 @@ let pendingDemo = null;
 };
 
 /* ================= 支付回跳确认 ================= */
+window.stopPolling = false;
 async function pollOrder(orderNo){
   if (state.demo){ banner('ok','（演示）订单已进入待审核状态。'); return; }
-  for (let i = 0; i < 30; i++){
+  for (let i = 0; i < 30; i++){if (window.stopPolling) return;
     try {
       const r = await fetch('/api/order?order_no=' + encodeURIComponent(orderNo));
       const d = await r.json();
