@@ -175,6 +175,25 @@ footer .ft-title{color:var(--ink);font-weight:600;font-size:13px;margin-bottom:8
 .modal-card h3{font-size:18px;font-weight:700;margin-bottom:12px}
 .modal-card p{font-size:13px;color:var(--ink2);line-height:1.9}
 .modal-card p b{color:var(--ink)}
+  /* ============ 收银台式二维码弹窗 ============ */
+.qr-cashier{max-width:340px;padding:0;overflow:hidden;text-align:center}
+.qr-brand{display:flex;align-items:center;gap:7px;padding:14px 16px;border-bottom:1px solid var(--line);position:relative}
+.qr-brand-logo{width:24px;height:24px;background:#1677FF;color:#fff;border-radius:6px;display:grid;place-items:center;font-size:13px;font-weight:700}
+.qr-brand-name{font-size:15px;font-weight:700;color:#1677FF;letter-spacing:.05em}
+.qr-brand-sub{font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.qr-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;font-size:20px;color:var(--ink2);cursor:pointer;line-height:1}
+.qr-close:hover{color:var(--ink)}
+.qr-head{padding:20px 16px 6px}
+.qr-scan-tip{font-size:13px;color:var(--ink2)}
+.qr-amount{font-size:30px;font-weight:700;color:var(--ink);margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.qr-code-wrap{position:relative;display:flex;justify-content:center;padding:18px 0 10px}
+#qrBox{padding:10px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.qr-expired{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.94);font-size:13px;color:var(--ink2);line-height:1.9;border-radius:12px}
+.qr-foot{background:#FFF7E8;border-top:1px solid #F5E6C4;padding:12px 16px;font-size:12px;color:#9A6B00;line-height:1.9}
+.qr-countdown{font-variant-numeric:tabular-nums;font-weight:600}
+.qr-launch{display:block;margin:14px 16px 0;background:#1677FF;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:13px;border-radius:10px}
+.qr-launch:active{background:#0E5FD8}
+.qr-mobile-tip{font-size:11px;color:var(--ink2);padding:10px 16px 16px;margin:0}
 .modal-actions{display:flex;gap:10px;margin-top:22px;justify-content:flex-end}
 .toast{position:fixed;bottom:22px;right:22px;z-index:400;background:var(--ink);color:#fff;font-size:13px;padding:12px 18px;border-radius:9px;box-shadow:0 8px 30px rgba(17,19,24,.25);opacity:0;transform:translateY(10px);transition:.25s;max-width:80vw}
 .toast.on{opacity:1;transform:none}
@@ -524,15 +543,25 @@ form.addEventListener('submit', async e => {
         const data = await r.json();
     if (!r.ok) throw new Error(data.error || '提交失败，请稍后再试');
 
-    /* 当面付：弹窗展示二维码，开始轮询支付状态 */
+       /* 当面付：弹窗展示二维码，开始轮询支付状态 */
     $('#qrAmount').textContent = '¥ ' + fmt(amt);
-    $('#qrBox').innerHTML = '';                                   /* 清掉旧码 */
-    new QRCode($('#qrBox'), { text: data.qrCode, width: 200, height: 200 });
+    $('#qrBox').innerHTML = '';
+    new QRCode($('#qrBox'), { text: data.qrCode, width: 190, height: 190 });
+    $('#qrExpired').classList.add('hidden');
     $('#qrModal').classList.remove('hidden');
+    /* 移动端：展示"打开支付宝App支付"按钮（二维码链接直接唤起） */
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      $('#qrLaunch').href = data.qrCode;
+      $('#qrLaunch').classList.remove('hidden');
+      $('#qrMobileTip').classList.remove('hidden');
+    } else {
+      $('#qrLaunch').classList.add('hidden');
+      $('#qrMobileTip').classList.add('hidden');
+    }
+    /* 倒计时：当面付二维码有效期约 5 分钟，和轮询窗口一致 */
+    startCountdown(300);
     pollOrder(data.orderNo);
-    payBtn.textContent = `去支付宝支付 ¥${fmt(amt)}`; payBtn.disabled = false;                                    /* 后台每2秒查一次，付完自动提示 */
-  } catch (err) {
-    toast(err.message, true);
     payBtn.textContent = `去支付宝支付 ¥${fmt(amt)}`; payBtn.disabled = false;
   }
 });
@@ -541,7 +570,7 @@ form.addEventListener('submit', async e => {
 let pendingDemo = null;
  $('#modalCancel').onclick = $('#modalMask').onclick = () => $('#modal').classList.add('hidden');
   /* 扫码弹窗：取消与手动查进度 */
- $('#qrCancel').onclick = () => { $('#qrModal').classList.add('hidden'); window.stopPolling = true; };
+ $('#qrCancel').onclick = () => { $('#qrModal').classList.add('hidden'); window.stopPolling = true; clearInterval(qrTimer); };
  $('#qrPaid').onclick = () => { toast('正在查询支付结果…'); };
  $('#modalOk').onclick = () => {
   $('#modal').classList.remove('hidden');
@@ -553,7 +582,22 @@ let pendingDemo = null;
     form.reset(); refreshPayBtn();
   }
 };
-
+/* 扫码倒计时与过期提示 */
+let qrTimer = null;
+function startCountdown(sec){
+  clearInterval(qrTimer);
+  const el = $('#qrCountdown');
+  qrTimer = setInterval(() => {
+    sec--;
+    if (sec <= 0) {
+      clearInterval(qrTimer);
+      el.textContent = '00:00';
+      $('#qrExpired').classList.remove('hidden');
+      return;
+    }
+    el.textContent = String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+  }, 1000);
+}
 /* ================= 支付回跳确认 ================= */
 async function pollOrder(orderNo){
   window.stopPolling = false;                     /* 每次开始新轮询前复位 */
