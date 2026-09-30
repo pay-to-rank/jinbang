@@ -119,19 +119,17 @@ export default async (req) => {
     await sql`INSERT INTO sites (order_no, title, url, description, contact, amount)
       VALUES (${orderNo}, ${title}, ${url}, ${description}, ${contact}, ${amount.toFixed(2)})`;
 
-    /* 生成支付宝电脑网站支付跳转链接 */
-    const payUrl = await getAlipay().pageExec('alipay.trade.page.pay', {
-      method: 'GET',
+        /* 当面付：生成二维码支付链接 */
+    const qrResult = await getAlipay().exec('alipay.trade.precreate', {
       notifyUrl: process.env.BASE_URL + '/api/notify',
-      returnUrl: process.env.BASE_URL + '/?paid=' + orderNo,
       bizContent: {
         out_trade_no: orderNo,
         total_amount: amount.toFixed(2),
         subject: '金榜上榜-' + title,
-        product_code: 'FAST_INSTANT_TRADE_PAY',
       },
     });
-    return json({ payUrl, orderNo });
+    if (!qrResult || !qrResult.qrCode) throw new Error('二维码生成失败');
+    return json({ qrCode: qrResult.qrCode, orderNo });
   } catch (e) {
     console.error('submit error:', e);
     return json({ error: '下单失败，请稍后再试' }, 500);
