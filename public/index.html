@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>金榜 · 出价登榜，价高者前</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <meta name="description" content="一块用出价排定座次的网站榜单。出价登榜，人工审核，价高者前。榜单持续更迭。每一次点击，都是一次新发现。">
 <style>
 /* ============ 基础 ============ */
@@ -325,7 +326,21 @@ footer .ft-title{color:var(--ink);font-weight:600;font-size:13px;margin-bottom:8
     </div>
   </div>
 </footer>
-
+<!-- 扫码支付弹窗（当面付） -->
+<div class="modal hidden" id="qrModal">
+  <div class="modal-mask"></div>
+  <div class="modal-card" style="text-align:center">
+    <h3>支付宝扫码付款</h3>
+    <p id="qrAmount" style="font-size:20px;font-weight:700;color:var(--ink);margin:6px 0 14px"></p>
+    <div id="qrBox" style="display:flex;justify-content:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;width:fit-content;margin:0 auto"></div>
+    <p style="margin-top:14px">打开<b>支付宝 App</b>「扫一扫」，扫描二维码完成付款</p>
+    <p style="margin-top:6px;font-size:12px;color:var(--ink2)">手机浏览器访问？<b>长按下方二维码</b>，选择"识别图中二维码"可直接付款</p>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="sbtn" id="qrCancel">取消</button>
+      <button class="sbtn ok" id="qrPaid">我已付款，查询进度</button>
+    </div>
+  </div>
+</div>
 <!-- 演示支付弹窗 -->
 <div class="modal hidden" id="modal">
   <div class="modal-mask" id="modalMask"></div>
