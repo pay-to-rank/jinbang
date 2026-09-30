@@ -66,7 +66,7 @@ export default async (req) => {
     /* 订单号格式白名单：必须是我们生成的 34 位编号 */
     if (!/^JB[0-9A-F]{32}$/.test(orderNo)) return json({ error: '订单号格式错误' }, 400);
     await ensureTable();
-    if (!(await rateLimit(clientIp(req), 'order', 120, 10))) {
+    if (!(await rateLimit(clientIp(req), 'order', 300, 10))) {
       return json({ error: '查询太频繁，请稍后再试' }, 429);
     }
 
