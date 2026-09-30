@@ -513,7 +513,8 @@ form.addEventListener('submit', async e => {
     $('#qrBox').innerHTML = '';                                   /* 清掉旧码 */
     new QRCode($('#qrBox'), { text: data.qrCode, width: 200, height: 200 });
     $('#qrModal').classList.remove('hidden');
-    pollOrder(data.orderNo);                                      /* 后台每2秒查一次，付完自动提示 */
+    pollOrder(data.orderNo);
+    payBtn.textContent = `去支付宝支付 ¥${fmt(amt)}`; payBtn.disabled = false;                                    /* 后台每2秒查一次，付完自动提示 */
   } catch (err) {
     toast(err.message, true);
     payBtn.textContent = `去支付宝支付 ¥${fmt(amt)}`; payBtn.disabled = false;
@@ -538,15 +539,16 @@ let pendingDemo = null;
 };
 
 /* ================= 支付回跳确认 ================= */
-window.stopPolling = false;
 async function pollOrder(orderNo){
+  window.stopPolling = false;                     /* 每次开始新轮询前复位 */
   if (state.demo){ banner('ok','（演示）订单已进入待审核状态。'); return; }
-  for (let i = 0; i < 30; i++){if (window.stopPolling) return;
+  for (let i = 0; i < 150; i++){if (window.stopPolling) return;
     try {
       const r = await fetch('/api/order?order_no=' + encodeURIComponent(orderNo));
       const d = await r.json();
-       if (d.status === 'pending_review'){
+        if (d.status === 'pending_review'){
         localStorage.setItem('jb_my_order', orderNo);   /* 记住我的订单，用于回访时提醒 */
+        $('#qrModal').classList.add('hidden');          /* 付款成功，收起二维码弹窗 */
         banner('ok', `支付成功！「${d.title}」已进入人工审核，通过后即会上榜。`);
         return;
       }
