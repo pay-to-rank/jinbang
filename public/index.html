@@ -552,11 +552,12 @@ async function pollOrder(orderNo){
         banner('ok', `支付成功！「${d.title}」已进入人工审核，通过后即会上榜。`);
         return;
       }
-      if (d.status === 'approved'){ banner('ok','该订单已审核通过，已登上榜单。'); return; }
-      if (d.status === 'rejected'){ banner('ok','该订单未通过审核，出价将原路退回。'); return; }
+            if (d.status === 'approved'){ $('#qrModal').classList.add('hidden'); banner('ok','该订单已审核通过，已登上榜单。'); return; }
+            if (d.status === 'rejected'){ $('#qrModal').classList.add('hidden'); banner('ok','该订单未通过审核，出价将原路退回。'); return; }
     } catch {}
     await new Promise(r => setTimeout(r, 2000));
   }
+  $('#qrModal').classList.add('hidden');
   banner('ok','暂时未查到支付结果。若你已完成支付，订单会在几分钟内自动确认，请稍后刷新查看。');
 }
 
